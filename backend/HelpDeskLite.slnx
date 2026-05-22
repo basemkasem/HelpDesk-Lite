@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/HelpDeskLite.Api/HelpDeskLite.Api.csproj" />
+    <Project Path="src/HelpDeskLite.Application/HelpDeskLite.Application.csproj" />
+    <Project Path="src/HelpDeskLite.Domain/HelpDeskLite.Domain.csproj" />
+    <Project Path="src/HelpDeskLite.Infrastructure/HelpDeskLite.Infrastructure.csproj" />
+  </Folder>
+</Solution>
