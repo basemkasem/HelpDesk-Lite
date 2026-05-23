@@ -24,8 +24,9 @@ public class CurrentUserService(IHttpContextAccessor httpContextAccessor) : ICur
     {
         get
         {
-            var role = User?.FindFirstValue(CustomClaimTypes.Role);
-            return Enum.TryParse<UserRole>(role, out var parsed) ? parsed : null;
+            var role = User?.FindFirstValue(CustomClaimTypes.Role)
+                ?? User?.FindFirstValue(ClaimTypes.Role);
+            return Enum.TryParse<UserRole>(role, ignoreCase: true, out var parsed) ? parsed : null;
         }
     }
 

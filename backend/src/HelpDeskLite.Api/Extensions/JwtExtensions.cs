@@ -15,12 +15,17 @@ public static class JwtExtensions
 
         if (string.IsNullOrWhiteSpace(jwtSettings.SigningKey) || jwtSettings.SigningKey.Length < 32)
         {
-            throw new InvalidOperationException("Jwt:SigningKey must be at least 32 characters.");
+            throw new InvalidOperationException(
+                "Jwt:SigningKey must be at least 32 characters. " +
+                "Set Jwt__SigningKey in the project root .env file (loaded before startup) or Jwt:SigningKey in appsettings.Development.json.");
         }
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
+                // Keep JWT claim names as-is ("role", "sub"). Default inbound mapping breaks RequireRole policies.
+                options.MapInboundClaims = false;
+
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,

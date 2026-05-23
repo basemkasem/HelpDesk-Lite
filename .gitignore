@@ -5,6 +5,9 @@ obj/
 *.suo
 .vs/
 
+# Uploads
+backend/src/HelpDeskLite.Api/uploads/
+
 # Secrets
 .env
 *.pfx
