@@ -40,6 +40,9 @@ public class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Exception
             ForbiddenException forbiddenEx => (
                 HttpStatusCode.Forbidden,
                 ApiResponse<object>.Fail(forbiddenEx.Message)),
+            BadRequestException badRequestEx => (
+                HttpStatusCode.BadRequest,
+                ApiResponse<object>.Fail(badRequestEx.Message)),
             UnauthorizedAccessException => (
                 HttpStatusCode.Unauthorized,
                 ApiResponse<object>.Fail("Unauthorized.")),

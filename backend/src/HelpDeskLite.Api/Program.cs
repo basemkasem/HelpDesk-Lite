@@ -8,15 +8,29 @@ using HelpDeskLite.Infrastructure;
 using HelpDeskLite.Infrastructure.Data;
 using Serilog;
 
+var envFile = FindEnvFile();
+if (envFile is not null)
+{
+    Env.Load(envFile);
+}
+
 var builder = WebApplication.CreateBuilder(args);
 
-if (builder.Environment.IsDevelopment())
+static string? FindEnvFile()
 {
-    var envPath = Path.GetFullPath(Path.Combine(builder.Environment.ContentRootPath, "..", "..", "..", ".env"));
-    if (File.Exists(envPath))
+    var directory = new DirectoryInfo(Directory.GetCurrentDirectory());
+    while (directory is not null)
     {
-        Env.Load(envPath);
+        var candidate = Path.Combine(directory.FullName, ".env");
+        if (File.Exists(candidate))
+        {
+            return candidate;
+        }
+
+        directory = directory.Parent;
     }
+
+    return null;
 }
 
 builder.Host.UseSerilog((context, services, configuration) =>
@@ -25,6 +39,12 @@ builder.Host.UseSerilog((context, services, configuration) =>
         .ReadFrom.Services(services)
         .Enrich.FromLogContext()
         .WriteTo.Console());
+
+builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options =>
+{
+    var maxBytes = builder.Configuration.GetValue<long>("FileStorage:MaxFileSizeBytes", 5 * 1024 * 1024);
+    options.MultipartBodyLengthLimit = maxBytes * 6;
+});
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>

@@ -8,7 +8,8 @@ public static class AuthorizationExtensions
 {
     public static IServiceCollection AddHelpDeskAuthorization(this IServiceCollection services)
     {
-        services.AddSingleton<IAuthorizationHandler, TicketAuthorizationHandler>();
+        // Scoped: handler uses ICurrentUserService and ITicketRepository (request-scoped).
+        services.AddScoped<IAuthorizationHandler, TicketAuthorizationHandler>();
 
         services.AddAuthorization(options =>
         {

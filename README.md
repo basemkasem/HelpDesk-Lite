@@ -18,20 +18,48 @@ Internal support ticketing system — **Epic 1: Authentication & User Access**
 
 ## Quick start
 
-### 1. PostgreSQL
+### 1. PostgreSQL (local install)
+
+Use your system PostgreSQL service (no Docker required). Ensure it is running, then create the database:
 
 ```bash
-cd "/mnt/my_ntfs_drive/Career/iCareer/Technical Phase/HelpDesk Lite"
-docker compose up -d
+# Linux (systemd) — start if needed
+sudo systemctl start postgresql
+
+# Create database (run as a user that can connect, often your Linux user or postgres)
+createdb helpdesk_lite
 ```
 
-Or use your own PostgreSQL instance matching `.env.example`.
+Or with `psql`:
+
+```sql
+CREATE DATABASE helpdesk_lite;
+```
+
+Optional: dedicated role (otherwise use your existing PostgreSQL user in `.env`):
+
+```sql
+CREATE USER helpdesk WITH PASSWORD 'your_password';
+CREATE DATABASE helpdesk_lite OWNER helpdesk;
+GRANT ALL PRIVILEGES ON DATABASE helpdesk_lite TO helpdesk;
+```
+
+**Connection string** — set in `.env` to match your install. Common examples:
+
+| Setup | `ConnectionStrings__DefaultConnection` |
+|-------|------------------------------------------|
+| Peer auth (Linux user = DB user) | `Host=localhost;Port=5432;Database=helpdesk_lite` |
+| `postgres` superuser | `Host=localhost;Port=5432;Database=helpdesk_lite;Username=postgres;Password=YOUR_PASSWORD` |
+| Dedicated `helpdesk` user | `Host=localhost;Port=5432;Database=helpdesk_lite;Username=helpdesk;Password=YOUR_PASSWORD` |
+
+> **Docker (optional):** `docker compose up -d` in the project root if you prefer a container instead of local Postgres.
 
 ### 2. Environment
 
 ```bash
+cd "/mnt/my_ntfs_drive/Career/iCareer/Technical Phase/HelpDesk Lite"
 cp .env.example .env
-# Edit Jwt__SigningKey (min 32 characters) and connection string if needed
+# Edit ConnectionStrings__DefaultConnection and Jwt__SigningKey (min 32 characters)
 ```
 
 ### 3. Database migration
@@ -73,6 +101,54 @@ npm run dev
 ```
 
 Open http://localhost:5173
+
+## Epic 3: Ticket Lifecycle Management
+
+Support agents and managers can manage tickets through a full lifecycle on the ticket detail page (`/tickets/{id}`).
+
+**Statuses:** New → Assigned → In Progress → Waiting for User → Resolved → Closed (invalid transitions blocked; managers can override).
+
+**API endpoints:**
+
+| Method | Path | Who |
+|--------|------|-----|
+| GET | `/api/tickets/{id}` | Owner (employee) or staff |
+| GET | `/api/tickets/{id}/history` | Timeline (internal notes hidden from employees) |
+| PATCH | `/api/tickets/{id}/status` | Support agent / manager |
+| PATCH | `/api/tickets/{id}/assign` | Support agent / manager |
+| POST | `/api/tickets/{id}/comments` | All (employees: public only) |
+| GET | `/api/users/agents` | Staff (assignee dropdown) |
+
+Apply migration:
+
+```bash
+dotnet ef database update -p src/HelpDeskLite.Infrastructure -s src/HelpDeskLite.Api
+```
+
+**Test as agent:** `agent@helpdesk.local` / `Agent123!` — open a ticket, change status, assign, add internal/public comments.
+
+## Epic 2: Ticket Submission
+
+Employees can submit tickets at **http://localhost:5173/tickets/new** with:
+
+- Subject, category, description, priority
+- Optional file attachments (configurable size/type limits in `FileStorage` settings)
+- Live knowledge base suggestions while typing the description
+
+**API endpoints:**
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/tickets` | Create ticket (`multipart/form-data`) |
+| GET | `/api/categories` | List active categories |
+| GET | `/api/knowledgebase/suggestions?description=` | KB article suggestions |
+
+After adding Epic 2 schema, run:
+
+```bash
+cd backend
+dotnet ef database update -p src/HelpDeskLite.Infrastructure -s src/HelpDeskLite.Api
+```
 
 ## Seed users (Development)
 
