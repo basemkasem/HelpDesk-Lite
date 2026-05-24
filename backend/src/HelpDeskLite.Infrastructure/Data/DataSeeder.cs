@@ -29,7 +29,7 @@ public class DataSeeder(
         context.Users.AddRange(employee, agent, admin);
 
         var hardware = await context.Categories.FirstAsync(c => c.Name == "Hardware", cancellationToken);
-        var software = await context.Categories.FirstAsync(c => c.Name == "Software", cancellationToken);
+        var accountAccess = await context.Categories.FirstAsync(c => c.Name == "Account Access", cancellationToken);
         var now = DateTime.UtcNow;
 
         var ticket1Id = Guid.NewGuid();
@@ -56,7 +56,7 @@ public class DataSeeder(
                 TicketNumber = "HD-SEED-00002",
                 Title = "Password reset request",
                 Description = "I need my Active Directory password reset for my employee account.",
-                CategoryId = software.Id,
+                CategoryId = accountAccess.Id,
                 Priority = TicketPriority.Medium,
                 CreatedByUserId = employee.Id,
                 AssigneeId = agent.Id,
@@ -103,21 +103,51 @@ public class DataSeeder(
         logger.LogInformation("Seed data created for users and tickets.");
     }
 
+    private static readonly (string Name, string Description, int SortOrder)[] CategorySeeds =
+    [
+        ("Hardware", "Laptops, desktops, printers, and peripherals", 1),
+        ("Software", "Applications, licenses, and installs", 2),
+        ("Network", "VPN, Wi-Fi, DNS, and connectivity", 3),
+        ("Account Access", "Passwords, permissions, MFA, and SSO", 4),
+        ("Email & Calendar", "Outlook, Teams, shared mailboxes, and calendars", 5),
+        ("Mobile Devices", "Phones, tablets, and mobile device management", 6),
+        ("Security", "Phishing reports, malware, and security incidents", 7),
+        ("Facilities", "Badges, desks, meeting rooms, and office equipment", 8),
+        ("HR & Payroll", "HR systems, payroll portals, and employee records", 9),
+        ("Procurement", "Purchasing, vendors, invoices, and asset requests", 10),
+        ("Training", "Learning platforms, onboarding tools, and course access", 11),
+        ("Other", "General requests that do not fit other categories", 99),
+    ];
+
     private async Task SeedCategoriesAsync(CancellationToken cancellationToken)
     {
-        if (await context.Categories.AnyAsync(cancellationToken))
+        var existingNames = await context.Categories
+            .Select(c => c.Name)
+            .ToListAsync(cancellationToken);
+
+        var addedCount = 0;
+        foreach (var (name, description, sortOrder) in CategorySeeds)
         {
-            return;
+            if (existingNames.Contains(name))
+            {
+                continue;
+            }
+
+            context.Categories.Add(new Category
+            {
+                Id = Guid.NewGuid(),
+                Name = name,
+                Description = description,
+                SortOrder = sortOrder
+            });
+            addedCount++;
         }
 
-        context.Categories.AddRange(
-            new Category { Id = Guid.NewGuid(), Name = "Hardware", Description = "Laptops, printers, peripherals", SortOrder = 1 },
-            new Category { Id = Guid.NewGuid(), Name = "Software", Description = "Applications and licenses", SortOrder = 2 },
-            new Category { Id = Guid.NewGuid(), Name = "Network", Description = "VPN, Wi-Fi, connectivity", SortOrder = 3 },
-            new Category { Id = Guid.NewGuid(), Name = "Account Access", Description = "Passwords, permissions, SSO", SortOrder = 4 },
-            new Category { Id = Guid.NewGuid(), Name = "Other", Description = "General requests", SortOrder = 5 });
-
-        await context.SaveChangesAsync(cancellationToken);
+        if (addedCount > 0)
+        {
+            await context.SaveChangesAsync(cancellationToken);
+            logger.LogInformation("Seeded {Count} ticket categories.", addedCount);
+        }
     }
 
     private async Task SeedKnowledgeBaseAsync(CancellationToken cancellationToken)
