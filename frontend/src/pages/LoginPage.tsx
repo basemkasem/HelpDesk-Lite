@@ -14,7 +14,7 @@ export function LoginPage() {
   const [error, setError] = useState<string | null>(null);
 
   if (isAuthenticated) {
-    return <Navigate to="/tickets" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   const handleSubmit = async (e: FormEvent) => {
@@ -24,7 +24,7 @@ export function LoginPage() {
     try {
       const result = await loginMutation.mutateAsync({ email, password });
       login({ email, password }, result.accessToken, result.user);
-      navigate('/tickets');
+      navigate('/dashboard');
     } catch (err) {
       if (isAxiosError(err)) {
         const apiError = err.response?.data as ApiResponse<LoginResponse> | undefined;

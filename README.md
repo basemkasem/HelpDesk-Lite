@@ -77,6 +77,31 @@ npm run dev
 
 Open http://localhost:5173 (API URL defaults to `https://localhost:5001` in `frontend/src/api/client.ts`).
 
+## Epic 4: Dashboard & Visibility
+
+Role-based dashboards with KPIs, searchable ticket queues, and manager reporting.
+
+| Role | Route | Features |
+|------|-------|----------|
+| Employee | `/dashboard` | Open tickets, status overview, recent activity, quick create |
+| Support agent | `/dashboard`, `/queue` | Queue KPIs, filters, search, sort, pagination, bulk assign |
+| Manager | `/dashboard`, `/queue` | Workload, aging, resolution trends, delayed tickets |
+
+**API endpoints:**
+
+| Method | Path | Who |
+|--------|------|-----|
+| GET | `/api/dashboard/employee` | All authenticated users |
+| GET | `/api/dashboard/support-queue` | Support agent / manager |
+| GET | `/api/dashboard/manager` | Manager only |
+| GET | `/api/tickets/search` | All (scoped by role) |
+| GET | `/api/tickets/filter` | Alias of search |
+| POST | `/api/tickets/bulk-assign` | Support agent / manager |
+| GET | `/api/reports/workload` | Support agent / manager |
+| GET | `/api/reports/ticket-aging` | Support agent / manager |
+
+Dashboards refresh every 30 seconds via React Query polling.
+
 ## Epic 3: Ticket Lifecycle Management
 
 Support agents and managers can manage tickets through a full lifecycle on the ticket detail page (`/tickets/{id}`).

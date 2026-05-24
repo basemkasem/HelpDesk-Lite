@@ -24,6 +24,8 @@ public static class DependencyInjection
 
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<ITicketRepository, TicketRepository>();
+        services.AddScoped<ITicketQueryRepository, TicketQueryRepository>();
+        services.AddScoped<IDashboardService, DashboardService>();
         services.AddScoped<ICategoryRepository, CategoryRepository>();
         services.AddScoped<IKnowledgeBaseRepository, KnowledgeBaseRepository>();
         services.AddScoped<ICategoryService, CategoryService>();

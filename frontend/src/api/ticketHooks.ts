@@ -52,6 +52,7 @@ export function useCreateTicketMutation() {
     mutationFn: (form: CreateTicketForm) => createTicket(form),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['tickets'] });
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] });
     },
   });
 }
@@ -64,6 +65,7 @@ export function useUpdateStatusMutation(ticketId: string) {
       void queryClient.invalidateQueries({ queryKey: ['tickets', ticketId] });
       void queryClient.invalidateQueries({ queryKey: ['tickets', ticketId, 'history'] });
       void queryClient.invalidateQueries({ queryKey: ['tickets'] });
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] });
     },
   });
 }
@@ -76,6 +78,7 @@ export function useAssignTicketMutation(ticketId: string) {
       void queryClient.invalidateQueries({ queryKey: ['tickets', ticketId] });
       void queryClient.invalidateQueries({ queryKey: ['tickets', ticketId, 'history'] });
       void queryClient.invalidateQueries({ queryKey: ['tickets'] });
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] });
     },
   });
 }
@@ -87,6 +90,7 @@ export function useAddCommentMutation(ticketId: string) {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['tickets', ticketId, 'history'] });
       void queryClient.invalidateQueries({ queryKey: ['tickets', ticketId] });
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] });
     },
   });
 }

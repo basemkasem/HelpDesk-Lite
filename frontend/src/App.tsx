@@ -7,6 +7,8 @@ import { CreateTicketPage } from './pages/CreateTicketPage';
 import { LoginPage } from './pages/LoginPage';
 import { TicketConfirmationPage } from './pages/TicketConfirmationPage';
 import { TicketDetailPage } from './pages/TicketDetailPage';
+import { DashboardPage } from './pages/DashboardPage';
+import { SupportQueuePage } from './pages/SupportQueuePage';
 import { TicketsPage } from './pages/TicketsPage';
 
 const queryClient = new QueryClient({
@@ -27,13 +29,15 @@ export default function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route element={<ProtectedRoute />}>
               <Route element={<AppLayout />}>
+                <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/queue" element={<SupportQueuePage />} />
                 <Route path="/tickets" element={<TicketsPage />} />
                 <Route path="/tickets/:id" element={<TicketDetailPage />} />
                 <Route path="/tickets/new" element={<CreateTicketPage />} />
                 <Route path="/tickets/confirmation/:id" element={<TicketConfirmationPage />} />
               </Route>
             </Route>
-            <Route path="*" element={<Navigate to="/tickets" replace />} />
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </BrowserRouter>
       </AuthProvider>

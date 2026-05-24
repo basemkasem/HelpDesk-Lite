@@ -3,6 +3,7 @@ using HelpDeskLite.Api.Authorization;
 using HelpDeskLite.Application.Common;
 using HelpDeskLite.Application.DTOs.Tickets;
 using HelpDeskLite.Application.Interfaces;
+using HelpDeskLite.Domain.Exceptions;
 using HelpDeskLite.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,6 +15,7 @@ namespace HelpDeskLite.Api.Controllers;
 [Authorize(Policy = PolicyNames.Employee)]
 public class TicketsController(
     ITicketService ticketService,
+    IDashboardService dashboardService,
     IValidator<CreateTicketRequestDto> createTicketValidator,
     IValidator<UpdateTicketStatusRequestDto> updateStatusValidator,
     IValidator<CreateTicketCommentRequestDto> createCommentValidator) : ControllerBase
@@ -23,6 +25,36 @@ public class TicketsController(
     {
         var tickets = await ticketService.GetTicketsAsync(cancellationToken);
         return Ok(ApiResponse<object>.Ok(tickets));
+    }
+
+    [HttpGet("search")]
+    public async Task<ActionResult<ApiResponse<object>>> SearchTickets(
+        [FromQuery] TicketQueryParameters parameters,
+        CancellationToken cancellationToken)
+    {
+        var result = await dashboardService.SearchTicketsAsync(parameters, cancellationToken);
+        return Ok(ApiResponse<object>.Ok(result));
+    }
+
+    [HttpGet("filter")]
+    public Task<ActionResult<ApiResponse<object>>> FilterTickets(
+        [FromQuery] TicketQueryParameters parameters,
+        CancellationToken cancellationToken) =>
+        SearchTickets(parameters, cancellationToken);
+
+    [HttpPost("bulk-assign")]
+    [Authorize(Policy = PolicyNames.SupportAgent)]
+    public async Task<ActionResult<ApiResponse<object>>> BulkAssign(
+        [FromBody] BulkAssignTicketsRequestDto request,
+        CancellationToken cancellationToken)
+    {
+        if (request.TicketIds.Count == 0)
+        {
+            throw new BadRequestException("Select at least one ticket.");
+        }
+
+        var count = await dashboardService.BulkAssignTicketsAsync(request, cancellationToken);
+        return Ok(ApiResponse<object>.Ok(new { updatedCount = count }));
     }
 
     [HttpGet("{id:guid}")]
