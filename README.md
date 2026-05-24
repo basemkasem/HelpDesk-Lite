@@ -1,10 +1,12 @@
 # HelpDesk Lite
 
-Internal support ticketing system — **Epic 1: Authentication & User Access**
+Internal support ticketing system
+
+## **Epic 1: Authentication & User Access**
 
 **Project location:** `/mnt/my_ntfs_drive/Career/iCareer/Technical Phase/HelpDesk Lite/`
 
-## Stack
+### Stack
 
 | Layer | Technology |
 |-------|------------|
@@ -16,9 +18,9 @@ Internal support ticketing system — **Epic 1: Authentication & User Access**
 | Validation | FluentValidation |
 | Passwords | ASP.NET Identity `PasswordHasher` |
 
-## Quick start
+### Quick start
 
-### 1. PostgreSQL
+#### 1. PostgreSQL
 
 Ensure PostgreSQL is running, then create the database (default dev credentials are in `appsettings.Development.json`):
 
@@ -42,7 +44,7 @@ CREATE DATABASE helpdesk_lite;
 
 Production secrets should use environment variables or user secrets, not committed JSON.
 
-### 2. Database migration
+#### 2. Database migration
 
 ```bash
 cd backend
@@ -57,7 +59,7 @@ dotnet ef migrations add <Name> -p src/HelpDeskLite.Infrastructure -s src/HelpDe
 
 EF Core reads the connection string from the API startup project (`appsettings.Development.json` when `ASPNETCORE_ENVIRONMENT=Development`).
 
-### 3. Run API
+#### 3. Run API
 
 ```bash
 cd backend/src/HelpDeskLite.Api
@@ -67,7 +69,7 @@ dotnet run
 - Swagger: https://localhost:5001/swagger
 - Health: https://localhost:5001/api/health
 
-### 4. Run frontend
+#### 4. Run frontend
 
 ```bash
 cd frontend
@@ -77,7 +79,7 @@ npm run dev
 
 Open http://localhost:5173 (API URL defaults to `https://localhost:5001` in `frontend/src/api/client.ts`).
 
-## Epic 4: Dashboard & Visibility
+### Epic 4: Dashboard & Visibility
 
 Role-based dashboards with KPIs, searchable ticket queues, and manager reporting.
 
@@ -102,7 +104,7 @@ Role-based dashboards with KPIs, searchable ticket queues, and manager reporting
 
 Dashboards refresh every 30 seconds via React Query polling.
 
-## Epic 3: Ticket Lifecycle Management
+### Epic 3: Ticket Lifecycle Management
 
 Support agents and managers can manage tickets through a full lifecycle on the ticket detail page (`/tickets/{id}`).
 
@@ -127,7 +129,7 @@ dotnet ef database update -p src/HelpDeskLite.Infrastructure -s src/HelpDeskLite
 
 **Test as agent:** `agent@helpdesk.local` / `Agent123!` — open a ticket, change status, assign, add internal/public comments.
 
-## Epic 2: Ticket Submission
+### Epic 2: Ticket Submission
 
 Employees can submit tickets at **http://localhost:5173/tickets/new** with:
 
@@ -150,7 +152,7 @@ cd backend
 dotnet ef database update -p src/HelpDeskLite.Infrastructure -s src/HelpDeskLite.Api
 ```
 
-## Seed users (Development)
+### Seed users (Development)
 
 | Email | Password | Role |
 |-------|----------|------|
@@ -158,9 +160,9 @@ dotnet ef database update -p src/HelpDeskLite.Infrastructure -s src/HelpDeskLite
 | agent@helpdesk.local | Agent123! | SupportAgent |
 | admin@helpdesk.local | Admin123! | ManagerAdmin |
 
-## API examples
+### API examples
 
-### Login
+#### Login
 
 ```bash
 curl -k -X POST https://localhost:5001/api/auth/login \
@@ -186,7 +188,7 @@ curl -k -X POST https://localhost:5001/api/auth/login \
 }
 ```
 
-### Get tickets (with token)
+#### Get tickets (with token)
 
 ```bash
 TOKEN="<accessToken>"
@@ -194,21 +196,21 @@ curl -k https://localhost:5001/api/tickets \
   -H "Authorization: Bearer $TOKEN"
 ```
 
-### Current user
+#### Current user
 
 ```bash
 curl -k https://localhost:5001/api/auth/me \
   -H "Authorization: Bearer $TOKEN"
 ```
 
-### Logout
+#### Logout
 
 ```bash
 curl -k -X POST https://localhost:5001/api/auth/logout \
   -H "Authorization: Bearer $TOKEN"
 ```
 
-## Authorization test matrix
+### Authorization test matrix
 
 | User | Login | GET /api/tickets | GET /api/tickets/{otherUserTicket} |
 |------|-------|------------------|-------------------------------------|
@@ -216,7 +218,7 @@ curl -k -X POST https://localhost:5001/api/auth/logout \
 | SupportAgent | OK | All | OK |
 | ManagerAdmin | OK | All | OK |
 
-## Solution structure
+### Solution structure
 
 ```
 backend/
@@ -233,7 +235,7 @@ frontend/
     components/ ProtectedRoute, Layout
 ```
 
-## Security notes
+### Security notes
 
 - Passwords are hashed with `PasswordHasher<User>` — never stored in plaintext
 - JWT access tokens (default 15 minutes)
@@ -241,7 +243,7 @@ frontend/
 - SSO: `IExternalAuthProvider` stub + `ExternalSubjectId` on `User`
 - Use HTTPS in production; trust dev cert: `dotnet dev-certs https --trust`
 
-## HTTPS dev certificate
+### HTTPS dev certificate
 
 ```bash
 dotnet dev-certs https --trust
