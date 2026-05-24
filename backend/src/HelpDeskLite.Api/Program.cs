@@ -1,5 +1,4 @@
 using System.Text.Json.Serialization;
-using DotNetEnv;
 using FluentValidation.AspNetCore;
 using HelpDeskLite.Api.Extensions;
 using HelpDeskLite.Api.Middleware;
@@ -8,30 +7,7 @@ using HelpDeskLite.Infrastructure;
 using HelpDeskLite.Infrastructure.Data;
 using Serilog;
 
-var envFile = FindEnvFile();
-if (envFile is not null)
-{
-    Env.Load(envFile);
-}
-
 var builder = WebApplication.CreateBuilder(args);
-
-static string? FindEnvFile()
-{
-    var directory = new DirectoryInfo(Directory.GetCurrentDirectory());
-    while (directory is not null)
-    {
-        var candidate = Path.Combine(directory.FullName, ".env");
-        if (File.Exists(candidate))
-        {
-            return candidate;
-        }
-
-        directory = directory.Parent;
-    }
-
-    return null;
-}
 
 builder.Host.UseSerilog((context, services, configuration) =>
     configuration
