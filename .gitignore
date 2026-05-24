@@ -9,7 +9,6 @@ obj/
 backend/src/HelpDeskLite.Api/uploads/
 
 # Secrets
-.env
 *.pfx
 
 # Node

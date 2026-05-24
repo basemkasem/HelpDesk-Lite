@@ -18,70 +18,46 @@ Internal support ticketing system — **Epic 1: Authentication & User Access**
 
 ## Quick start
 
-### 1. PostgreSQL (local install)
+### 1. PostgreSQL
 
-Use your system PostgreSQL service (no Docker required). Ensure it is running, then create the database:
+Ensure PostgreSQL is running, then create the database (default dev credentials are in `appsettings.Development.json`):
 
 ```bash
-# Linux (systemd) — start if needed
-sudo systemctl start postgresql
-
-# Create database (run as a user that can connect, often your Linux user or postgres)
-createdb helpdesk_lite
+sudo systemctl start postgresql   # Linux, if needed
+createdb -U postgres helpdesk_lite
 ```
 
-Or with `psql`:
+Or in `psql`:
 
 ```sql
 CREATE DATABASE helpdesk_lite;
 ```
 
-Optional: dedicated role (otherwise use your existing PostgreSQL user in `.env`):
+**Configuration** — edit `backend/src/HelpDeskLite.Api/appsettings.Development.json`:
 
-```sql
-CREATE USER helpdesk WITH PASSWORD 'your_password';
-CREATE DATABASE helpdesk_lite OWNER helpdesk;
-GRANT ALL PRIVILEGES ON DATABASE helpdesk_lite TO helpdesk;
-```
+| Setting | Default (development) |
+|---------|------------------------|
+| `ConnectionStrings:DefaultConnection` | `Host=localhost;Port=5432;Database=helpdesk_lite;Username=postgres;Password=123456` |
+| `Jwt:SigningKey` | Dev-only signing key (min 32 characters) |
 
-**Connection string** — set in `.env` to match your install. Common examples:
+Production secrets should use environment variables or user secrets, not committed JSON.
 
-| Setup | `ConnectionStrings__DefaultConnection` |
-|-------|------------------------------------------|
-| Peer auth (Linux user = DB user) | `Host=localhost;Port=5432;Database=helpdesk_lite` |
-| `postgres` superuser | `Host=localhost;Port=5432;Database=helpdesk_lite;Username=postgres;Password=YOUR_PASSWORD` |
-| Dedicated `helpdesk` user | `Host=localhost;Port=5432;Database=helpdesk_lite;Username=helpdesk;Password=YOUR_PASSWORD` |
-
-> **Docker (optional):** `docker compose up -d` in the project root if you prefer a container instead of local Postgres.
-
-### 2. Environment
-
-```bash
-cd "/mnt/my_ntfs_drive/Career/iCareer/Technical Phase/HelpDesk Lite"
-cp .env.example .env
-# Edit ConnectionStrings__DefaultConnection and Jwt__SigningKey (min 32 characters)
-```
-
-### 3. Database migration
+### 2. Database migration
 
 ```bash
 cd backend
-export $(grep -v '^#' ../.env | xargs)   # or set vars manually on Windows
-
-dotnet ef database update \
-  -p src/HelpDeskLite.Infrastructure \
-  -s src/HelpDeskLite.Api
+dotnet ef database update -p src/HelpDeskLite.Infrastructure -s src/HelpDeskLite.Api
 ```
 
 **Create new migrations:**
 
 ```bash
-dotnet ef migrations add <Name> \
-  -p src/HelpDeskLite.Infrastructure \
-  -s src/HelpDeskLite.Api
+dotnet ef migrations add <Name> -p src/HelpDeskLite.Infrastructure -s src/HelpDeskLite.Api
 ```
 
-### 4. Run API
+EF Core reads the connection string from the API startup project (`appsettings.Development.json` when `ASPNETCORE_ENVIRONMENT=Development`).
+
+### 3. Run API
 
 ```bash
 cd backend/src/HelpDeskLite.Api
@@ -91,16 +67,15 @@ dotnet run
 - Swagger: https://localhost:5001/swagger
 - Health: https://localhost:5001/api/health
 
-### 5. Run frontend
+### 4. Run frontend
 
 ```bash
 cd frontend
-cp .env.example .env
 npm install
 npm run dev
 ```
 
-Open http://localhost:5173
+Open http://localhost:5173 (API URL defaults to `https://localhost:5001` in `frontend/src/api/client.ts`).
 
 ## Epic 3: Ticket Lifecycle Management
 
