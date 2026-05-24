@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
   useAddCommentMutation,
@@ -44,8 +44,15 @@ export function TicketDetailPage() {
   const [newStatus, setNewStatus] = useState('');
   const [assigneeId, setAssigneeId] = useState('');
   const [comment, setComment] = useState('');
+
+  useEffect(() => {
+    setAssigneeId(ticket?.assigneeId ?? '');
+  }, [ticket?.assigneeId]);
   const [isInternal, setIsInternal] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+
+  const currentAssigneeId = ticket?.assigneeId ?? '';
+  const assignmentUnchanged = assigneeId === currentAssigneeId;
 
   if (isLoading) {
     return <p className="text-slate-600">Loading ticket...</p>;
@@ -204,7 +211,7 @@ export function TicketDetailPage() {
             </select>
             <button
               type="button"
-              disabled={assignTicket.isPending}
+              disabled={assignTicket.isPending || assignmentUnchanged}
               onClick={() => void handleAssign()}
               className="mt-2 w-full rounded-lg border border-indigo-600 px-3 py-2 text-sm font-medium text-indigo-700 hover:bg-indigo-50 disabled:opacity-60"
             >

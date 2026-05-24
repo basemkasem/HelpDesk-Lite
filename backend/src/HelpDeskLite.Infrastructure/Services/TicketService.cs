@@ -186,6 +186,11 @@ public class TicketService(
         var ticket = await ticketRepository.GetByIdForUpdateAsync(id, cancellationToken)
             ?? throw new BadRequestException("Ticket not found.");
 
+        if (ticket.AssigneeId == request.AssigneeId)
+        {
+            return (await GetTicketDetailAsync(id, cancellationToken))!;
+        }
+
         if (request.AssigneeId.HasValue)
         {
             var assignee = await userRepository.GetByIdAsync(request.AssigneeId.Value, cancellationToken);
